@@ -7,10 +7,21 @@ local ExternalAuthHandler = BasePlugin:extend()
 local CACHE_TOKEN_KEY = "oauth_token"
 local EXPIRATION_MARGIN = 5
 
+local priority_env_var = "EXTERNAL_OAUTH_REQUEST_PRIORITY"
+local priority
+if os.getenv(priority_env_var) then
+    priority = tonumber(os.getenv(priority_env_var))
+else
+    priority = 900
+end
+kong.log.debug('EXTERNAL_OAUTH_REQUEST_PRIORITY: ' .. priority)
+
+ExternalAuthHandler.PRIORITY = priority
+ExternalAuthHandler.VERSION = "1.1.0"
+
 function ExternalAuthHandler:new()
   ExternalAuthHandler.super.new(self, "external-oauth-request")
 end
-
 
 -----------
 -- ACCESS
