@@ -122,6 +122,12 @@ KONG_LUA_SSL_VERIFY_DEPTH=2
 
 For more information please refer to https://discuss.konghq.com/t/kong-log-error-about-certificate/6371/6
 
+## Priority
+By default, the priority of the plugin is 900. You can change it using an environment variable:
+```
+EXTERNAL_OAUTH_REQUEST_PRIORITY=1000
+```
+
 ## Author
 
 Optare Solutions
