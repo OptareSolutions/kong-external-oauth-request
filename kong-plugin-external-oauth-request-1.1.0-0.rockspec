@@ -5,7 +5,7 @@ local rockspec_revision = "0"
 
 local github_account_name = "OptareSolutions"
 local github_repo_name = "kong-external-oauth-request"
-local github_tag = "main"
+local github_tag = "1.1.0"
 
 package = package_name
 version = package_version .. "-" .. rockspec_revision
