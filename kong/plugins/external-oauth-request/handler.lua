@@ -17,7 +17,7 @@ end
 kong.log.debug('EXTERNAL_OAUTH_REQUEST_PRIORITY: ' .. priority)
 
 ExternalAuthHandler.PRIORITY = priority
-ExternalAuthHandler.VERSION = "1.1.0"
+ExternalAuthHandler.VERSION = "1.1.1"
 
 function ExternalAuthHandler:new()
   ExternalAuthHandler.super.new(self, "external-oauth-request")
@@ -184,8 +184,5 @@ function get_token_from_response(res, conf)
     expiration = expiration
   };
 end
-
-ExternalAuthHandler.PRIORITY = 900
-ExternalAuthHandler.VERSION = "1.0.0"
 
 return ExternalAuthHandler
