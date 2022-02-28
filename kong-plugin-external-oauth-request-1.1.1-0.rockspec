@@ -1,6 +1,6 @@
 local plugin_name = "external-oauth-request"
 local package_name = "kong-plugin-" .. plugin_name
-local package_version = "1.1.0"
+local package_version = "1.1.1"
 local rockspec_revision = "0"
 
 local github_account_name = "OptareSolutions"
