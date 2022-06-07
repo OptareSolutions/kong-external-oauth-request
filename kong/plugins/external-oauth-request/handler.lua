@@ -17,7 +17,7 @@ end
 kong.log.debug('EXTERNAL_OAUTH_REQUEST_PRIORITY: ' .. priority)
 
 ExternalAuthHandler.PRIORITY = priority
-ExternalAuthHandler.VERSION = "1.1.1"
+ExternalAuthHandler.VERSION = "1.1.2"
 
 function ExternalAuthHandler:new()
   ExternalAuthHandler.super.new(self, "external-oauth-request")
@@ -34,12 +34,12 @@ function ExternalAuthHandler:access(conf)
   -- Get token with cache
   if conf.cache_enabled then
     if conf.log_enabled then
-      kong.log.warn("Cache enabled")
+      kong.log.info("Cache enabled")
     end
     tokenInfo = get_cache_token(conf)
     if not tokenInfo then
       if conf.log_enabled then
-        kong.log.warn("No token in cache. Call OAuth provider to update it")
+        kong.log.info("No token in cache. Call OAuth provider to update it")
       end
       tokenInfo = kong.cache:get(CACHE_TOKEN_KEY, nil, get_oauth_token, conf)
     end
@@ -54,7 +54,8 @@ function ExternalAuthHandler:access(conf)
   end
 
   if conf.log_enabled then
-    kong.log.warn("Login success. Token: " .. cjson.encode(tokenInfo))
+    kong.log.info("Login success.")
+    kong.log.debug("Token: " .. cjson.encode(tokenInfo))
   end
 
   kong.service.request.set_header(conf.header_request, "Bearer " .. tokenInfo.token)
@@ -69,7 +70,7 @@ function ExternalAuthHandler:response(conf)
 
   if conf.cache_enabled and (kong.response.get_status() == 401) then
     if conf.log_enabled then
-      kong.log.warn("Unauthorized response. Invalidate token from cache")
+      kong.log.info("Unauthorized response. Invalidate token from cache")
     end
 
     kong.cache:invalidate(CACHE_TOKEN_KEY)
@@ -93,7 +94,7 @@ function get_cache_token(conf)
   if token.expiration and (token.expiration < os.time()) then
     -- Token is expired invalidate it
     if conf.log_enabled then
-      kong.log.warn("Invalidate expired token: " .. cjson.encode(token))
+      kong.log.debug("Invalidate expired token: " .. cjson.encode(token))
     end
     kong.cache:invalidate(CACHE_TOKEN_KEY)
     return nil
@@ -117,9 +118,9 @@ end
 -- Login
 function perform_login(conf)
   if conf.log_enabled then
-    kong.log.warn("Login via external OAuth")
-    kong.log.warn("Token URL:  ", conf.token_url)
-    kong.log.warn("Grant type: ", conf.grant_type)
+    kong.log.info("Login via external OAuth")
+    kong.log.debug("Token URL:  ", conf.token_url)
+    kong.log.debug("Grant type: ", conf.grant_type)
   end
 
   local request_body = "grant_type=" .. conf.grant_type .. "&client_id=" .. conf.client_id .. "&client_secret=" .. conf.client_secret
@@ -149,14 +150,14 @@ end
 function validate_login(res, err, conf)
   if not res then
     if conf.log_enabled then
-      kong.log.warn("No response. Error: ", err)
+      kong.log.err("No response. Error: ", err)
     end
     return "No response from OAuth provider"
   end
 
   if res.status ~= 200 then
     if conf.log_enabled then
-      kong.log.warn("Got error status ", res.status, res.body)
+      kong.log.err("Got error status ", res.status, res.body)
     end
     return "Invalid authentication credentials"
   end
@@ -174,8 +175,8 @@ function get_token_from_response(res, conf)
   end
 
   if conf.log_enabled then
-    kong.log.warn("Current time: ", os.time())
-    kong.log.warn("Expiration time: ", expiration)
+    kong.log.debug("Current time: ", os.time())
+    kong.log.debug("Expiration time: ", expiration)
   end
 
   return {

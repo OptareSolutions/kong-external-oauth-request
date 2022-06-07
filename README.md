@@ -6,7 +6,7 @@ The token is added to the request as Bearer Authentication.
 
 ![alt Plugin flow](doc/kong-external-oauth-flow.png)
 
-> Authentication credentials are got from configuration, not from the request. Becaus of that we encourage you to add any type of security ahead this service.
+> Authentication credentials are got from configuration, not from the request. Because of that we encourage you to add any type of security ahead this service.
 
 ## References
 
