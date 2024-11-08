@@ -1,8 +1,10 @@
-local BasePlugin = require "kong.plugins.base_plugin"
 local http = require "resty.http"
 local cjson = require "cjson"
 local kong = kong
-local ExternalAuthHandler = BasePlugin:extend()
+
+local ExternalAuthHandler = {
+  VERSION  = "1.2.0",
+}
 
 local CACHE_TOKEN_KEY = "oauth_token"
 local EXPIRATION_MARGIN = 5
@@ -10,24 +12,18 @@ local EXPIRATION_MARGIN = 5
 local priority_env_var = "EXTERNAL_OAUTH_REQUEST_PRIORITY"
 local priority
 if os.getenv(priority_env_var) then
-    priority = tonumber(os.getenv(priority_env_var))
+  priority = tonumber(os.getenv(priority_env_var))
 else
-    priority = 900
+  priority = 900
 end
 kong.log.debug('EXTERNAL_OAUTH_REQUEST_PRIORITY: ' .. priority)
 
 ExternalAuthHandler.PRIORITY = priority
-ExternalAuthHandler.VERSION = "1.1.2"
-
-function ExternalAuthHandler:new()
-  ExternalAuthHandler.super.new(self, "external-oauth-request")
-end
 
 -----------
 -- ACCESS
 -----------
 function ExternalAuthHandler:access(conf)
-  ExternalAuthHandler.super.access(self)
 
   local tokenInfo = nil
 
@@ -43,14 +39,16 @@ function ExternalAuthHandler:access(conf)
       end
       tokenInfo = kong.cache:get(CACHE_TOKEN_KEY, nil, get_oauth_token, conf)
     end
-  -- Get token without cache
+    -- Get token without cache
   else
     tokenInfo = get_oauth_token(conf)
   end
 
   -- Final validation and set header
   if not tokenInfo then
-    return kong.response.exit(401, {message="Invalid authentication credentials"})
+    return kong.response.exit(401, {
+      message = "Invalid authentication credentials"
+    })
   end
 
   if conf.log_enabled then
@@ -61,12 +59,10 @@ function ExternalAuthHandler:access(conf)
   kong.service.request.set_header(conf.header_request, "Bearer " .. tokenInfo.token)
 end
 
-
 -----------
 -- RESPONSE
 -----------
 function ExternalAuthHandler:response(conf)
-  ExternalAuthHandler.super.response(self)
 
   if conf.cache_enabled and (kong.response.get_status() == 401) then
     if conf.log_enabled then
@@ -74,9 +70,8 @@ function ExternalAuthHandler:response(conf)
     end
 
     kong.cache:invalidate(CACHE_TOKEN_KEY)
-  end  
+  end
 end
-
 
 -------------
 -- FUNCTIONS
@@ -123,7 +118,8 @@ function perform_login(conf)
     kong.log.debug("Grant type: ", conf.grant_type)
   end
 
-  local request_body = "grant_type=" .. conf.grant_type .. "&client_id=" .. conf.client_id .. "&client_secret=" .. conf.client_secret
+  local request_body = "grant_type=" .. conf.grant_type .. "&client_id=" .. conf.client_id .. "&client_secret=" ..
+                         conf.client_secret
 
   if conf.grant_type == "password" then
     request_body = request_body .. "&username=" .. conf.username .. "&password=" .. conf.password
@@ -132,19 +128,15 @@ function perform_login(conf)
   local client = http.new()
   client:set_timeouts(conf.connect_timeout, conf.send_timeout, conf.read_timeout)
 
-  return client:request_uri(
-    conf.token_url, 
-    {
-      method = "POST",
-      ssl_verify = conf.ssl_verify_enabled,
-      body = request_body,
-      headers = {
-        ["Content-Type"] = "application/x-www-form-urlencoded"
-      }
+  return client:request_uri(conf.token_url, {
+    method = "POST",
+    ssl_verify = conf.ssl_verify_enabled,
+    body = request_body,
+    headers = {
+      ["Content-Type"] = "application/x-www-form-urlencoded"
     }
-  )
+  })
 end
-
 
 -- Validate login response
 function validate_login(res, err, conf)
@@ -162,7 +154,6 @@ function validate_login(res, err, conf)
     return "Invalid authentication credentials"
   end
 end
-
 
 -- Extract token
 function get_token_from_response(res, conf)
