@@ -17,7 +17,7 @@ end
 kong.log.debug('EXTERNAL_OAUTH_REQUEST_PRIORITY: ' .. priority)
 
 ExternalAuthHandler.PRIORITY = priority
-ExternalAuthHandler.VERSION = "1.1.2"
+ExternalAuthHandler.VERSION = "2.0.0"
 
 function ExternalAuthHandler:new()
   ExternalAuthHandler.super.new(self, "external-oauth-request")

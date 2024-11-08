@@ -6,15 +6,6 @@ The token is added to the request as Bearer Authentication.
 
 ![alt Plugin flow](doc/kong-external-oauth-flow.png)
 
-> Authentication credentials are obtained from configuration, not from the request. Because of that we encourage you to add some sort of security ahead this service.
-
-⚠️ Shared cache warning
-```
-This plugin supports caching the token, but this cache is shared between requests, so you have to be careful: if this plugin is configured in multiple routes/instances, the token obtained from the cache not be valid.
-This behaviour is corrected
-If you want to correct this error, you should see the bodyrequest-auth plugin, in this plugin this error has been solved and the code structure is similar to that of this plugin.
-```
-
 ## References
 
 This project is loosely based on:
