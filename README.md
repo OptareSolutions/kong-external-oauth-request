@@ -6,15 +6,14 @@ The token is added to the request as Bearer Authentication.
 
 ![alt Plugin flow](doc/kong-external-oauth-flow.png)
 
-> Authentication credentials are got from configuration, not from the request. Because of that we encourage you to add any type of security ahead this service.
+> Authentication credentials are obtained from configuration, not from the request. Because of that we encourage you to add some sort of security ahead this service.
 
-⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
-> This plugin supports caching a token with a key, this key is always the same and this is a big problem when the plugin is configured on multiple APIS,
-> because all plugin instances get the value from the same key, this causes only calls from the first API to work, all other calls fail with 401 because the plugin sends 
-> a token from one third-party service to a different third-party service.
-> Currently this does not happen because this plugin is only configured on one API.
-> If you want to correct this error, you should see the bodyrequest-auth plugin, in this plugin this error has been solved and the code structure is similar to that of this plugin.
-⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+⚠️ Shared cache warning
+```
+This plugin supports caching the token, but this cache is shared between requests, so you have to be careful: if this plugin is configured in multiple routes/instances, the token obtained from the cache not be valid.
+This behaviour is corrected
+If you want to correct this error, you should see the bodyrequest-auth plugin, in this plugin this error has been solved and the code structure is similar to that of this plugin.
+```
 
 ## References
 
