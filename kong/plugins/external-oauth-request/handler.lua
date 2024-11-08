@@ -3,7 +3,7 @@ local cjson = require "cjson"
 local kong = kong
 
 local ExternalAuthHandler = {
-  VERSION  = "1.2.0",
+  VERSION  = "2.0.0",
 }
 
 local CACHE_TOKEN_KEY = "oauth_token"
@@ -37,7 +37,7 @@ function ExternalAuthHandler:access(conf)
       if conf.log_enabled then
         kong.log.info("No token in cache. Call OAuth provider to update it")
       end
-      tokenInfo = kong.cache:get(CACHE_TOKEN_KEY, nil, get_oauth_token, conf)
+      tokenInfo = kong.cache:get(CACHE_TOKEN_KEY .. "_" .. conf.token_url .. "_" .. conf.client_id, nil, get_oauth_token, conf)
     end
     -- Get token without cache
   else
@@ -69,7 +69,7 @@ function ExternalAuthHandler:response(conf)
       kong.log.info("Unauthorized response. Invalidate token from cache")
     end
 
-    kong.cache:invalidate(CACHE_TOKEN_KEY)
+    kong.cache:invalidate(CACHE_TOKEN_KEY .. "_" .. conf.token_url .. "_" .. conf.client_id)
   end
 end
 
@@ -79,10 +79,10 @@ end
 
 -- Get token from cache
 function get_cache_token(conf)
-  local token = kong.cache:get(CACHE_TOKEN_KEY)
+  local token = kong.cache:get(CACHE_TOKEN_KEY .. "_" .. conf.token_url .. "_" .. conf.client_id)
   -- If value in cache is nil we must invalidate it
   if not token then
-    kong.cache:invalidate(CACHE_TOKEN_KEY)
+    kong.cache:invalidate(CACHE_TOKEN_KEY .. "_" .. conf.token_url .. "_" .. conf.client_id)
     return nil
   end
 
@@ -91,7 +91,7 @@ function get_cache_token(conf)
     if conf.log_enabled then
       kong.log.debug("Invalidate expired token: " .. cjson.encode(token))
     end
-    kong.cache:invalidate(CACHE_TOKEN_KEY)
+    kong.cache:invalidate(CACHE_TOKEN_KEY .. "_" .. conf.token_url .. "_" .. conf.client_id)
     return nil
   end
 
